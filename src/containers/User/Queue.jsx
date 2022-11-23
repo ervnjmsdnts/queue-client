@@ -19,7 +19,9 @@ const Queue = ({ category, window, queueNumber = 0, est = "115min" }) => {
         <Typography variant="h5" fontWeight="bold">
           {category}
         </Typography>
-        <Typography variant="h6">{window}</Typography>
+        <Typography variant="h6" color="gray">
+          {window}
+        </Typography>
       </Box>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box

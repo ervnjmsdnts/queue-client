@@ -1,7 +1,15 @@
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  useMediaQuery,
+} from "@mui/material";
 import Queue from "../containers/User/Queue";
 
 const UserPage = () => {
+  const matches = useMediaQuery("(min-width: 600px)");
   return (
     <Box>
       <Box
@@ -10,21 +18,25 @@ const UserPage = () => {
         justifyContent="flex-end"
         alignItems="flex-end"
       >
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Age</InputLabel>
-          <Select label="Age">
+        <FormControl sx={{ minWidth: matches ? "200px" : "100%" }} size="small">
+          <InputLabel id="label">Campus</InputLabel>
+          <Select label="Campus" labelId="label">
             <MenuItem value={10}>Ten</MenuItem>
             <MenuItem value={20}>Twenty</MenuItem>
             <MenuItem value={30}>Thirty</MenuItem>
           </Select>
         </FormControl>
       </Box>
-      <Box display="grid" gap="24px" gridTemplateColumns="repeat(4, 1fr)">
+      <Box
+        display="grid"
+        gap="24px"
+        gridTemplateColumns={!matches ? "repeat(1, 1fr)" : "repeat(4, 1fr)"}
+      >
         <Queue category="REGISTRAR" window="Window 1" />
-        <Queue category="REGISTRAR" window="Window 1" />
-        <Queue category="REGISTRAR" window="Window 1" />
-        <Queue category="REGISTRAR" window="Window 1" />
-        <Queue category="REGISTRAR" window="Window 1" />
+        <Queue category="REGISTRAR" window="Window 2" />
+        <Queue category="REGISTRAR" window="Window 3" />
+        <Queue category="REGISTRAR" window="Window 4" />
+        <Queue category="REGISTRAR" window="Window 5" />
       </Box>
     </Box>
   );
