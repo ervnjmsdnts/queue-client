@@ -32,11 +32,11 @@ const UserPage = () => {
         gap="24px"
         gridTemplateColumns={!matches ? "repeat(1, 1fr)" : "repeat(4, 1fr)"}
       >
-        <Queue category="REGISTRAR" window="Window 1" />
-        <Queue category="REGISTRAR" window="Window 2" />
-        <Queue category="REGISTRAR" window="Window 3" />
-        <Queue category="REGISTRAR" window="Window 4" />
-        <Queue category="REGISTRAR" window="Window 5" />
+        <Queue organization="REGISTRAR" window="Window 1" />
+        <Queue organization="REGISTRAR" window="Window 2" />
+        <Queue organization="REGISTRAR" window="Window 3" />
+        <Queue organization="REGISTRAR" window="Window 4" />
+        <Queue organization="REGISTRAR" window="Window 5" />
       </Box>
     </Box>
   );
