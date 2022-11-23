@@ -1,12 +1,11 @@
-import { Box, Button, Link, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import AuthInput from "./AuthInput";
 
-const LoginForm = ({ changeForm }) => {
+const RegisterForm = ({ changeForm }) => {
   return (
     <Stack gap="8px" width="100%">
       <Typography fontWeight="bold" mb="16px" variant="h4">
-        Login
+        Register
       </Typography>
       <Box
         display="flex"
@@ -15,15 +14,20 @@ const LoginForm = ({ changeForm }) => {
         flexDirection="column"
         gap="16px"
       >
+        <Box display="flex" width="100%" gap="16px">
+          <AuthInput label="First Name" />
+          <AuthInput label="Last Name" />
+        </Box>
         <AuthInput label="Email" />
         <AuthInput label="Password" type="password" />
+        <AuthInput label="Confirm Password" type="password" />
         <Button variant="contained" fullWidth size="large">
-          Log in
+          Register
         </Button>
         <Typography>
-          Don&apos;t have an account?{" "}
+          Already have an account?{" "}
           <Link onClick={changeForm} sx={{ cursor: "pointer" }}>
-            Register
+            Log in
           </Link>
         </Typography>
       </Box>
@@ -31,4 +35,4 @@ const LoginForm = ({ changeForm }) => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
