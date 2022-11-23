@@ -19,8 +19,8 @@ const UserPage = () => {
         alignItems="flex-end"
       >
         <FormControl sx={{ minWidth: matches ? "200px" : "100%" }} size="small">
-          <InputLabel id="label">Campus</InputLabel>
-          <Select label="Campus" labelId="label">
+          <InputLabel id="label">Organization</InputLabel>
+          <Select label="Organization" labelId="label" defaultValue={10}>
             <MenuItem value={10}>Ten</MenuItem>
             <MenuItem value={20}>Twenty</MenuItem>
             <MenuItem value={30}>Thirty</MenuItem>

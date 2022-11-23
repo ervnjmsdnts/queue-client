@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import CustomAppBar from "../components/Appbar";
 
@@ -6,9 +6,9 @@ const UserLayout = ({ children }) => {
   return (
     <>
       <CustomAppBar />
-      <Box px="32px" py="16px">
-        {children ? children : <Outlet />}
-      </Box>
+      <Container maxWidth="xl">
+        <Box py="32px">{children ? children : <Outlet />}</Box>
+      </Container>
     </>
   );
 };
