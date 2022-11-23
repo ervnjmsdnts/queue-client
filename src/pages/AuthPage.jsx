@@ -1,10 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useState } from "react";
 import LoginForm from "../containers/Auth/LoginForm";
 import RegisterForm from "../containers/Auth/RegisterForm";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+
+  const matches = useMediaQuery("(min-width: 600px)");
 
   const showRegisterForm = () => setIsLogin(false);
   const showLoginForm = () => setIsLogin(true);
@@ -14,7 +16,7 @@ const AuthPage = () => {
       <Box
         sx={{
           display: "flex",
-          width: "60%",
+          width: matches ? "60%" : "100%",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -37,17 +39,19 @@ const AuthPage = () => {
           )}
         </Box>
       </Box>
-      <Box
-        display="flex"
-        width="100%"
-        justifyContent="center"
-        backgroundColor="primary.main"
-        alignItems="center"
-      >
-        <Typography variant="h2" color="white" fontWeight="bold">
-          Welcome to QueueR
-        </Typography>
-      </Box>
+      {matches && (
+        <Box
+          display="flex"
+          width="100%"
+          justifyContent="center"
+          backgroundColor="primary.main"
+          alignItems="center"
+        >
+          <Typography variant="h2" color="white" fontWeight="bold">
+            Welcome to QueueR
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };
