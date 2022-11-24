@@ -13,12 +13,22 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useState } from "react";
 import { Divider } from "@mui/material";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import useAuth from "../hooks/useAuth";
 
 const pages = ["How to use", "About"];
 
 const CustomAppBar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+
+  const { currentUser } = useAuth();
+
+  const handleLogout = () => {
+    signOut(auth);
+    window.location.reload();
+  };
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -162,11 +172,11 @@ const CustomAppBar = () => {
                     gap="8px"
                   >
                     <Typography fontWeight="bold">Name</Typography>
-                    <Typography>Earvin James Dantes</Typography>
+                    <Typography>{currentUser.displayName}</Typography>
                     <Typography fontWeight="bold">ID</Typography>
-                    <Typography>acd890</Typography>
+                    <Typography>{currentUser.uid.slice(0, 6)}</Typography>
                     <Typography fontWeight="bold">Email</Typography>
-                    <Typography>testemailtest@gmail.com</Typography>
+                    <Typography>{currentUser.email}</Typography>
                   </Box>
                   <Box
                     width="64px"
@@ -178,7 +188,7 @@ const CustomAppBar = () => {
                 <MenuItem>
                   <Typography>Change Password</Typography>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem onClick={handleLogout}>
                   <Typography>Log out</Typography>
                 </MenuItem>
               </Box>
