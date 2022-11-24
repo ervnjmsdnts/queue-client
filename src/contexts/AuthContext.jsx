@@ -8,6 +8,7 @@ export const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({});
+  const [getUser, setGetUser] = useState(true);
 
   const navigate = useNavigate();
 
@@ -18,7 +19,7 @@ const AuthProvider = ({ children }) => {
       const snap = await getDoc(doc(db, "users", user?.uid));
 
       setCurrentUser(snap.data());
-      console.log(auth.currentUser);
+      setGetUser(false);
     });
 
     return () => {
@@ -29,8 +30,9 @@ const AuthProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       currentUser,
+      getUser,
     }),
-    [currentUser]
+    [currentUser, getUser]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

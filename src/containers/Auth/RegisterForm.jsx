@@ -2,7 +2,6 @@ import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import AuthInput from "./AuthInput";
 import { useRegister } from "./actions";
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -19,8 +18,6 @@ const RegisterForm = ({ changeForm }) => {
 
   const { execute, error, isValidating, data } = useRegister();
 
-  const navigate = useNavigate();
-
   const onSubmit = async (data) => {
     await execute({ ...data });
   };
@@ -31,8 +28,9 @@ const RegisterForm = ({ changeForm }) => {
       if (error) return toast.error("Something went wrong");
 
       toast.success("Successfully registered");
+      window.location.reload();
     })();
-  }, [data, error, navigate]);
+  }, [data, error]);
 
   return (
     <Stack gap="8px" width="100%">

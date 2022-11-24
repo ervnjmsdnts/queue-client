@@ -4,8 +4,8 @@ import CustomAppBar from "../components/Appbar";
 import useAuth from "../hooks/useAuth";
 
 const UserLayout = ({ children }) => {
-  const { currentUser } = useAuth();
-  if (Object.keys(currentUser).length === 0) {
+  const { getUser } = useAuth();
+  if (getUser) {
     return (
       <Box
         height="100vh"
