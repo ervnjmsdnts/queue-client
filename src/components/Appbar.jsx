@@ -1,4 +1,3 @@
-import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -11,19 +10,31 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-import { useState } from "react";
-import { Divider } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { AppBar, Divider } from "@mui/material";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import useAuth from "../hooks/useAuth";
+import QRCode from "qrcode";
+import QRDialog from "./QRDialog";
 
 const pages = ["How to use", "About"];
 
 const CustomAppBar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const [openQRDialog, setOpenQRDialog] = useState(false);
+  const [QRSrc, setQRSrc] = useState("");
 
   const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (currentUser) {
+      QRCode.toDataURL(`http://localhost:3000/qr/${currentUser.uid}`).then(
+        setQRSrc
+      );
+    }
+  }, [currentUser]);
 
   const handleLogout = () => {
     signOut(auth);
@@ -45,158 +56,181 @@ const CustomAppBar = () => {
     setAnchorElUser(null);
   };
 
+  const userInitials = useMemo(
+    () =>
+      currentUser.displayName
+        .split(" ")
+        .map((initial) => initial[0])
+        .join(""),
+    [currentUser]
+  );
+
+  console.log(userInitials);
+
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/user"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+    <>
+      <QRDialog
+        onClose={() => setOpenQRDialog(false)}
+        open={openQRDialog}
+        QRSrc={QRSrc}
+      />
+      <AppBar position="static">
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="/user"
               sx={{
-                display: { xs: "block", md: "none" },
+                mr: 2,
+                display: { xs: "none", md: "flex" },
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".3rem",
+                color: "inherit",
+                textDecoration: "none",
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "white", display: "block" }}
-              >
-                {page}
-              </Button>
-            ))}
-          </Box>
+              LOGO
+            </Typography>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
               </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{
+                  display: { xs: "block", md: "none" },
+                }}
+              >
+                {pages.map((page) => (
+                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">{page}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <Typography
+              variant="h5"
+              noWrap
+              component="a"
+              href=""
+              sx={{
+                mr: 2,
+                display: { xs: "flex", md: "none" },
+                flexGrow: 1,
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".3rem",
+                color: "inherit",
+                textDecoration: "none",
               }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
             >
-              <Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  gap="16px"
-                  px="16px"
-                  py="8px"
+              LOGO
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+              {pages.map((page) => (
+                <Button
+                  key={page}
+                  onClick={handleCloseNavMenu}
+                  sx={{ my: 2, color: "white", display: "block" }}
                 >
+                  {page}
+                </Button>
+              ))}
+            </Box>
+
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar>{userInitials}</Avatar>
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                <Box>
                   <Box
-                    display="grid"
-                    gridTemplateColumns="repeat(2, 1fr)"
-                    maxWidth="300px"
-                    gap="8px"
+                    display="flex"
+                    justifyContent="space-between"
+                    gap="16px"
+                    px="16px"
+                    py="8px"
                   >
-                    <Typography fontWeight="bold">Name</Typography>
-                    <Typography>{currentUser.displayName}</Typography>
-                    <Typography fontWeight="bold">ID</Typography>
-                    <Typography>{currentUser.uid.slice(0, 6)}</Typography>
-                    <Typography fontWeight="bold">Email</Typography>
-                    <Typography>{currentUser.email}</Typography>
+                    <Box
+                      display="grid"
+                      gridTemplateColumns="repeat(2, 1fr)"
+                      maxWidth="300px"
+                      gap="8px"
+                    >
+                      <Typography fontWeight="bold">Name</Typography>
+                      <Typography>{currentUser.displayName}</Typography>
+                      <Typography fontWeight="bold">ID</Typography>
+                      <Typography>{currentUser.uid.slice(0, 6)}</Typography>
+                      <Typography fontWeight="bold">Email</Typography>
+                      <Typography>{currentUser.email}</Typography>
+                    </Box>
+                    <Box
+                      onClick={() => setOpenQRDialog(true)}
+                      component="img"
+                      alt="qrcode"
+                      src={QRSrc}
+                      width="64px"
+                      sx={{ cursor: "pointer" }}
+                      height="64px"
+                      backgroundColor="primary.main"
+                    />
                   </Box>
-                  <Box
-                    width="64px"
-                    height="64px"
-                    backgroundColor="primary.main"
-                  />
+                  <Divider />
+                  <MenuItem>
+                    <Typography>Change Password</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <Typography>Log out</Typography>
+                  </MenuItem>
                 </Box>
-                <Divider />
-                <MenuItem>
-                  <Typography>Change Password</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <Typography>Log out</Typography>
-                </MenuItem>
-              </Box>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+              </Menu>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+    </>
   );
 };
 export default CustomAppBar;
