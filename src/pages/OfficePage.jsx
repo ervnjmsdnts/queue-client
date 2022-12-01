@@ -1,10 +1,11 @@
-import { Box, Typography } from "@mui/material";
+import { Container } from "@mui/material";
+import QueueList from "../containers/Office/QueueList";
 
 const OfficePage = () => {
   return (
-    <Box>
-      <Typography>Hello World</Typography>
-    </Box>
+    <Container maxWidth="md">
+      <QueueList />
+    </Container>
   );
 };
 

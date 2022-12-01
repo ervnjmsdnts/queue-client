@@ -1,14 +1,14 @@
 import { Box, Container } from "@mui/material";
 import { Navigate, Outlet } from "react-router-dom";
-import CustomAppBar from "../components/Appbar";
+import StaffAppbar from "../components/StaffAppbar";
 import useAuth from "../hooks/useAuth";
 
-const UserLayout = ({ children }) => {
+const StaffLayout = ({ children }) => {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/" />;
   return (
     <>
-      <CustomAppBar />
+      <StaffAppbar />
       <Container maxWidth="xl">
         <Box py="32px">{children ? children : <Outlet />}</Box>
       </Container>
@@ -16,4 +16,4 @@ const UserLayout = ({ children }) => {
   );
 };
 
-export default UserLayout;
+export default StaffLayout;

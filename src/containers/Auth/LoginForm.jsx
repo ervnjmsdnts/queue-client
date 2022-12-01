@@ -1,12 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, Link, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import { doc, getDoc } from "firebase/firestore";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { db } from "../../firebase";
 import { useLogin } from "./actions";
 import AuthInput from "./AuthInput";
 import { loginSchema } from "./schemas";
@@ -20,8 +17,6 @@ const LoginForm = ({ changeForm }) => {
 
   const { data, execute, isValidating, error } = useLogin();
 
-  const navigate = useNavigate();
-
   const onSubmit = async (data) => {
     await execute({ ...data });
   };
@@ -32,16 +27,10 @@ const LoginForm = ({ changeForm }) => {
       if (error) return toast.error("Something went wrong");
 
       toast.success("Welcome");
-
-      const snap = await getDoc(doc(db, "users", data.uid));
-
-      const snapRes = snap.data();
-
-      if (snapRes.role === "user") return navigate("/user");
-      if (snapRes.role === "office") return navigate("/office");
-      if (snapRes.role === "admin") return navigate("/admin");
+      localStorage.setItem("user", JSON.stringify(data));
+      window.location.reload();
     })();
-  }, [data, error, navigate]);
+  }, [data, error]);
 
   return (
     <Stack gap="8px" width="100%">

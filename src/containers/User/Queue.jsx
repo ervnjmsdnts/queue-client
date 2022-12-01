@@ -1,9 +1,38 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { db } from "../../firebase";
+import useAuth from "../../hooks/useAuth";
 import QueueConfirmationDialog from "./QueueConfirmationDialog";
 
-const Queue = ({ organization, window, queueNumber = 0, est = "115min" }) => {
+const Queue = ({ organization, window, officeId }) => {
   const [openDialog, setOpenDialog] = useState(false);
+  const [inQueue, setInQueue] = useState(false);
+  const [peopleInQueue, setPeopleInQueue] = useState(0);
+  const [queueNumber, setQueueNumber] = useState(0);
+
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    const ref = doc(db, "offices", officeId);
+    const unsub = onSnapshot(ref, (snapshot) => {
+      const peopleInQueue = snapshot.data().peopleInQueue.length;
+      const queueNumber = snapshot
+        .data()
+        .peopleInQueue.findIndex((q) => q.id === currentUser.id);
+      const isInQueue = snapshot
+        .data()
+        .peopleInQueue.some((q) => q.id === currentUser.id);
+
+      setInQueue(isInQueue);
+      setPeopleInQueue(peopleInQueue);
+      setQueueNumber(queueNumber + 1);
+    });
+    return () => {
+      unsub();
+    };
+  }, [currentUser, officeId]);
+
   return (
     <>
       <QueueConfirmationDialog
@@ -11,6 +40,9 @@ const Queue = ({ organization, window, queueNumber = 0, est = "115min" }) => {
         open={openDialog}
         organization={organization}
         window={window}
+        officeId={officeId}
+        queueNumber={queueNumber}
+        isRemove={inQueue}
       />
       <Box
         p="16px"
@@ -33,7 +65,12 @@ const Queue = ({ organization, window, queueNumber = 0, est = "115min" }) => {
             {window}
           </Typography>
         </Box>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          textAlign="center"
+          alignItems="center"
+        >
           <Box
             display="flex"
             flexDirection="column"
@@ -43,7 +80,7 @@ const Queue = ({ organization, window, queueNumber = 0, est = "115min" }) => {
             <Typography fontWeight="bold" variant="h6">
               People in Queue
             </Typography>
-            <Typography variant="h6">{queueNumber}</Typography>
+            <Typography variant="h6">{peopleInQueue}</Typography>
           </Box>
           <Box
             display="flex"
@@ -52,19 +89,22 @@ const Queue = ({ organization, window, queueNumber = 0, est = "115min" }) => {
             alignItems="center"
           >
             <Typography fontWeight="bold" variant="h6">
-              Estimated Time
+              Your Queue Number
             </Typography>
-            <Typography variant="h6">{est}</Typography>
+            <Typography variant="h6">
+              {queueNumber === 0 ? "Not In Queue" : queueNumber}
+            </Typography>
           </Box>
         </Box>
         <Button
           variant="contained"
+          color={inQueue ? "warning" : "primary"}
           fullWidth
           size="large"
           disableElevation
           onClick={() => setOpenDialog(true)}
         >
-          Go in Queue
+          {inQueue ? "Already In Queue" : "Go In Queue"}
         </Button>
       </Box>
     </>

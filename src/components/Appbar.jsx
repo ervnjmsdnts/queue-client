@@ -12,11 +12,10 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useEffect, useMemo, useState } from "react";
 import { AppBar, Divider } from "@mui/material";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
 import useAuth from "../hooks/useAuth";
 import QRCode from "qrcode";
 import QRDialog from "./QRDialog";
+import ChangePasswordDialog from "./ChangePasswordDialog";
 
 const pages = ["How to use", "About"];
 
@@ -24,20 +23,20 @@ const CustomAppBar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [openQRDialog, setOpenQRDialog] = useState(false);
+  const [openChangePasswordDialog, setOpenChangePasswordDialog] =
+    useState(false);
   const [QRSrc, setQRSrc] = useState("");
 
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
 
   useEffect(() => {
     if (currentUser) {
-      QRCode.toDataURL(`http://localhost:3000/qr/${currentUser.uid}`).then(
-        setQRSrc
-      );
+      QRCode.toDataURL(`${JSON.stringify({ ...currentUser })}`).then(setQRSrc);
     }
   }, [currentUser]);
 
   const handleLogout = () => {
-    signOut(auth);
+    logout();
     window.location.reload();
   };
 
@@ -65,10 +64,12 @@ const CustomAppBar = () => {
     [currentUser]
   );
 
-  console.log(userInitials);
-
   return (
     <>
+      <ChangePasswordDialog
+        onClose={() => setOpenChangePasswordDialog(false)}
+        open={openChangePasswordDialog}
+      />
       <QRDialog
         onClose={() => setOpenQRDialog(false)}
         open={openQRDialog}
@@ -202,7 +203,7 @@ const CustomAppBar = () => {
                       <Typography fontWeight="bold">Name</Typography>
                       <Typography>{currentUser.displayName}</Typography>
                       <Typography fontWeight="bold">ID</Typography>
-                      <Typography>{currentUser.uid.slice(0, 6)}</Typography>
+                      <Typography>{currentUser.id.slice(0, 6)}</Typography>
                       <Typography fontWeight="bold">Email</Typography>
                       <Typography>{currentUser.email}</Typography>
                     </Box>
@@ -218,7 +219,7 @@ const CustomAppBar = () => {
                     />
                   </Box>
                   <Divider />
-                  <MenuItem>
+                  <MenuItem onClick={() => setOpenChangePasswordDialog(true)}>
                     <Typography>Change Password</Typography>
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>

@@ -1,38 +1,25 @@
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { createContext, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth, db } from "../firebase";
+import { createContext, useCallback, useMemo, useState } from "react";
 
 export const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState({});
-  const [getUser, setGetUser] = useState(true);
+  const [currentUser, setCurrentUser] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
 
-  const navigate = useNavigate();
+  const logout = useCallback(() => {
+    setCurrentUser(null);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) return navigate("/");
-
-      const snap = await getDoc(doc(db, "users", user?.uid));
-
-      setCurrentUser(snap.data());
-      setGetUser(false);
-    });
-
-    return () => {
-      unsub();
-    };
+    localStorage.removeItem("user");
+    window.location.href = "/";
   }, []);
 
   const value = useMemo(
     () => ({
       currentUser,
-      getUser,
+      logout,
     }),
-    [currentUser, getUser]
+    [currentUser, logout]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,11 +1,6 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { useCallback, useState } from "react";
-import { auth, db } from "../../firebase";
+import { db } from "../../firebase";
 
 export const useRegister = () => {
   const [response, setResponse] = useState();
@@ -15,24 +10,15 @@ export const useRegister = () => {
   const execute = useCallback(async (payload = {}) => {
     try {
       setIsValidating(true);
-      const res = await createUserWithEmailAndPassword(
-        auth,
-        payload.email,
-        payload.password
-      );
 
-      await updateProfile(res.user, {
-        displayName: `${payload.firstName} ${payload.lastName}`,
-      });
-
-      await setDoc(doc(db, "users", res.user.uid), {
-        uid: res.user.uid,
+      const res = await addDoc(collection(db, "users"), {
         displayName: `${payload.firstName} ${payload.lastName}`,
         role: "user",
         email: payload.email,
+        password: payload.password,
       });
 
-      setResponse(res.user);
+      setResponse(res);
     } catch (e) {
       setError(e);
       throw e;
@@ -57,13 +43,18 @@ export const useLogin = () => {
   const execute = useCallback(async (payload = {}) => {
     try {
       setIsValidating(true);
-      const res = await signInWithEmailAndPassword(
-        auth,
-        payload.email,
-        payload.password
-      );
-      setResponse(res.user);
+      setError();
+      const conditions = [
+        where("email", "==", payload.email),
+        where("password", "==", payload.password),
+      ];
+      const ref = collection(db, "users");
+      const filterQuery = query(ref, ...conditions);
+      const user = await getDocs(filterQuery);
+      if (!user.size) return setError("error");
+      setResponse({ id: user.docs[0].id, ...user.docs[0].data() });
     } catch (e) {
+      console.log(e);
       setError(e);
     } finally {
       setIsValidating(false);
