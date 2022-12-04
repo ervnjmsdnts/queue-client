@@ -64,9 +64,6 @@ const ScannerPage = () => {
       <Typography variant="h5" mb="16px" fontWeight="bold">
         Scan QR Code
       </Typography>
-      <Typography variant="h5" fontWeight="bold">
-        Please Scan: {currOffice?.peopleInQueue?.[0].id.slice(0, 6)}
-      </Typography>
       <QrReader
         onResult={handleScan}
         containerStyle={{ marginTop: -64 }}
