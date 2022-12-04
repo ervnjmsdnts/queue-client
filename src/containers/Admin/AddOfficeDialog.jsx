@@ -14,7 +14,7 @@ const AddOfficeDialog = ({ onClose, open }) => {
 
   const onSubmit = useCallback(
     async (data) => {
-      await execute({ ...data, orgId });
+      await execute({ ...data, orgId, peopleInQueue: [] });
     },
     [execute, orgId]
   );
@@ -27,7 +27,7 @@ const AddOfficeDialog = ({ onClose, open }) => {
       toast.success("Added office");
       onClose();
     })();
-  }, [data, error, onClose]);
+  }, [data, error]);
 
   return (
     <Dialog onClose={onClose} open={open}>

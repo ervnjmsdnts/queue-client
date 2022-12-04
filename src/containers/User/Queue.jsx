@@ -1,11 +1,12 @@
 import { Box, Button, Typography } from "@mui/material";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { db } from "../../firebase";
 import useAuth from "../../hooks/useAuth";
 import QueueConfirmationDialog from "./QueueConfirmationDialog";
 
-const Queue = ({ organization, window, officeId }) => {
+const Queue = ({ organization, window, officeId, inAnotherQueue }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [peopleInQueue, setPeopleInQueue] = useState(0);
@@ -32,6 +33,14 @@ const Queue = ({ organization, window, officeId }) => {
       unsub();
     };
   }, [currentUser, officeId]);
+
+  const handleOpenDialog = () => {
+    if (inQueue) return setOpenDialog(true);
+    if (inAnotherQueue) return toast.error("Only limited to 1 queue");
+    return setOpenDialog(true);
+  };
+
+  console.log({ inAnotherQueue });
 
   return (
     <>
@@ -102,7 +111,7 @@ const Queue = ({ organization, window, officeId }) => {
           fullWidth
           size="large"
           disableElevation
-          onClick={() => setOpenDialog(true)}
+          onClick={handleOpenDialog}
         >
           {inQueue ? "Already In Queue" : "Go In Queue"}
         </Button>

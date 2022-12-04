@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import AuthLayout from "./layouts/AuthLayout";
+import OfficeLayout from "./layouts/OfficeLayout";
 import StaffLayout from "./layouts/StaffLayout";
 import UserLayout from "./layouts/UserLayout";
 import AdminPage from "./pages/AdminPage";
@@ -24,11 +25,9 @@ const App = () => {
           <Route path="organization/:orgId" element={<OrganizationPage />} />
         </Route>
       </Route>
-      <Route element={<StaffLayout />}>
-        <Route path="/office">
-          <Route path="" element={<OfficePage />} />
-          <Route path="scan" element={<ScannerPage />} />
-        </Route>
+      <Route element={<OfficeLayout />}>
+        <Route path="/office" element={<OfficePage />} />
+        <Route path="/scan" element={<ScannerPage />} />
       </Route>
     </Routes>
   );

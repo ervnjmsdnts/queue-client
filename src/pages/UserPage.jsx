@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Queue from "../containers/User/Queue";
 import { db } from "../firebase";
+import useAuth from "../hooks/useAuth";
 
 const UserPage = () => {
   const matches = useMediaQuery("(min-width: 600px)");
@@ -19,6 +20,7 @@ const UserPage = () => {
   const [offices, setOffices] = useState([]);
   const [queues, setQueues] = useState([]);
   const [loadingOrg, setLoadingOrg] = useState(true);
+  const [inAnotherQueue, setInAnotherQueue] = useState(false);
   const [loadingOff, setLoadingOff] = useState(true);
 
   const { register, watch, setValue } = useForm();
@@ -50,13 +52,20 @@ const UserPage = () => {
     };
   }, []);
 
+  const { currentUser } = useAuth();
+
   useEffect(() => {
     (async () => {
       if (organizations && offices) {
+        const isInQueueArr = offices.map((office) =>
+          office.peopleInQueue.some((of) => of.id === currentUser.id)
+        );
+        const isInQueue = isInQueueArr.some((arr) => arr === true);
         setQueues(offices.filter((office) => office.orgId === selectedOrg));
+        setInAnotherQueue(isInQueue);
       }
     })();
-  }, [offices, selectedOrg, organizations]);
+  }, [offices, selectedOrg, organizations, currentUser.id]);
 
   if (loadingOrg || loadingOff) {
     return (
@@ -97,6 +106,7 @@ const UserPage = () => {
       >
         {queues.map((queue) => (
           <Queue
+            inAnotherQueue={inAnotherQueue}
             organization={queue.name}
             key={queue.id}
             window={queue.window}

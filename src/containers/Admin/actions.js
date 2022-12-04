@@ -1,4 +1,13 @@
-import { addDoc, collection, doc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { useCallback, useState } from "react";
 import { db } from "../../firebase";
 
@@ -35,6 +44,13 @@ export const useAddOffice = () => {
   const execute = useCallback(async (payload = {}) => {
     try {
       setIsValidating(true);
+      setError();
+      const conditions = [where("email", "==", payload.email)];
+      const ref = collection(db, "users");
+      const filterQuery = query(ref, ...conditions);
+      const user = await getDocs(filterQuery);
+
+      if (user.size) return setError("already exists");
 
       const resUser = await addDoc(collection(db, "users"), {
         displayName: payload.username,

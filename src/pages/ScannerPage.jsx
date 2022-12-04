@@ -1,6 +1,5 @@
 import { Typography } from "@mui/material";
 import { Container } from "@mui/system";
-import userEvent from "@testing-library/user-event";
 import {
   arrayRemove,
   arrayUnion,
@@ -10,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../firebase";
 import useAuth from "../hooks/useAuth";
@@ -21,8 +19,6 @@ const ScannerPage = () => {
   const [loading, setLoading] = useState(true);
 
   const { currentUser } = useAuth();
-
-  const navigate = useNavigate();
 
   const handleScan = (result) => {
     if (result) {
@@ -55,11 +51,9 @@ const ScannerPage = () => {
           await updateDoc(doc(db, "offices", currentUser.id), {
             peopleInQueue: arrayUnion({ ...userInQueue, attendance: true }),
           });
-          toast.success("Attendance Confirmed");
-          return navigate(-1);
+          return toast.success("Attendance Confirmed");
         } else {
-          toast.error("You are not in this queue");
-          return navigate(-1);
+          return toast.error("You are not in this queue");
         }
       }
     })();
@@ -67,10 +61,18 @@ const ScannerPage = () => {
 
   return (
     <Container maxWidth="md">
-      <Typography variant="h5" fontWeight="bold">
+      <Typography variant="h5" mb="16px" fontWeight="bold">
         Scan QR Code
       </Typography>
-      <QrReader onResult={handleScan} delay={300} style={{ width: "100%" }} />
+      <Typography variant="h5" fontWeight="bold">
+        Please Scan: {currOffice?.peopleInQueue?.[0].id.slice(0, 6)}
+      </Typography>
+      <QrReader
+        onResult={handleScan}
+        containerStyle={{ marginTop: -64 }}
+        delay={300}
+        style={{ width: "100%" }}
+      />
     </Container>
   );
 };

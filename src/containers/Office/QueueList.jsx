@@ -132,7 +132,12 @@ const QueueList = () => {
           <Typography variant="h4" fontWeight="bold">
             {office.name} {office.window}
           </Typography>
-          <Button variant="contained" LinkComponent={Link} to="scan">
+          <Button
+            target="_blank"
+            variant="contained"
+            LinkComponent={Link}
+            to="/scan"
+          >
             Scan QR
           </Button>
         </Box>
