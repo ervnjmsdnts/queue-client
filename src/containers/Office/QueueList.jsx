@@ -122,7 +122,7 @@ const QueueList = () => {
 
   return (
     <>
-      <Box height="400px">
+      <Box height="100%">
         <Box
           display="flex"
           justifyContent="space-between"
@@ -142,7 +142,7 @@ const QueueList = () => {
           </Button>
         </Box>
         <Box
-          height="500px"
+          height="70vh"
           width="100%"
           display="flex"
           justifyContent="space-between"
