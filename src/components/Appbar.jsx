@@ -14,14 +14,27 @@ import { useEffect, useMemo, useState } from "react";
 import { AppBar, Divider } from "@mui/material";
 import useAuth from "../hooks/useAuth";
 import QRCode from "qrcode";
+import Logo from "../assets/queuerlogo.png";
 import QRDialog from "./QRDialog";
 import ChangePasswordDialog from "./ChangePasswordDialog";
+import { Notifications } from "@mui/icons-material";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../firebase";
 
 const pages = ["How to use", "About"];
 
 const CustomAppBar = () => {
+  const [notifications, setNotifications] = useState([]);
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const [anchorNotif, setAnchorNotif] = useState(null);
   const [openQRDialog, setOpenQRDialog] = useState(false);
   const [openChangePasswordDialog, setOpenChangePasswordDialog] =
     useState(false);
@@ -35,9 +48,39 @@ const CustomAppBar = () => {
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    const ref = collection(db, "notifications");
+    const q = query(ref, where("userId", "==", currentUser.id));
+    const unsub = onSnapshot(q, (snapshot) => {
+      setNotifications(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          message: doc.data().message,
+        }))
+      );
+    });
+
+    return () => {
+      unsub();
+    };
+  }, [currentUser.id]);
+
   const handleLogout = () => {
     logout();
     window.location.reload();
+  };
+
+  const removeNotif = async (notifId) => {
+    await deleteDoc(doc(db, "notifications", notifId));
+    handleCloseNotif();
+  };
+
+  const handleOpenNotif = (event) => {
+    setAnchorNotif(event.currentTarget);
+  };
+
+  const handleCloseNotif = (even) => {
+    setAnchorNotif(null);
   };
 
   const handleOpenNavMenu = (event) => {
@@ -78,24 +121,16 @@ const CustomAppBar = () => {
       <AppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-            <Typography
-              variant="h6"
-              noWrap
-              component="a"
-              href="/user"
+            <Box
+              component="img"
+              src={Logo}
               sx={{
-                mr: 2,
                 display: { xs: "none", md: "flex" },
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
+                mr: 1,
+                width: "32px",
+                height: "32px",
               }}
-            >
-              LOGO
-            </Typography>
+            />
 
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
               <IconButton
@@ -133,25 +168,16 @@ const CustomAppBar = () => {
                 ))}
               </Menu>
             </Box>
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-            <Typography
-              variant="h5"
-              noWrap
-              component="a"
-              href=""
+            <Box
+              component="img"
+              src={Logo}
               sx={{
-                mr: 2,
                 display: { xs: "flex", md: "none" },
-                flexGrow: 1,
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
+                mr: 1,
+                width: "32px",
+                height: "32px",
               }}
-            >
-              LOGO
-            </Typography>
+            />
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {pages.map((page) => (
                 <Button
@@ -164,12 +190,64 @@ const CustomAppBar = () => {
               ))}
             </Box>
 
-            <Box sx={{ flexGrow: 0 }}>
+            <Box
+              sx={{
+                flexGrow: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <IconButton
+                onClick={notifications.length !== 0 ? handleOpenNotif : null}
+                sx={{ position: "relative" }}
+              >
+                <Notifications />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    backgroundColor: "red",
+                    color: "white",
+                    borderRadius: "999px",
+                    width: "20px",
+                    height: "20px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography>{notifications?.length}</Typography>
+                </Box>
+              </IconButton>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                   <Avatar>{userInitials}</Avatar>
                 </IconButton>
               </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorNotif}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorNotif)}
+                onClose={handleCloseNotif}
+              >
+                {notifications?.map((notif) => (
+                  <MenuItem onClick={() => removeNotif(notif.id)}>
+                    {notif.message}
+                  </MenuItem>
+                ))}
+              </Menu>
               <Menu
                 sx={{ mt: "45px" }}
                 id="menu-appbar"

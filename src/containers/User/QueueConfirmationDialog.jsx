@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Typography } from "@mui/material";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { db } from "../../firebase";
@@ -41,8 +41,6 @@ const QueueConfirmationDialog = ({
     };
   }, [officeId]);
 
-  const newQueueNumber = currOffice?.peopleInQueue?.length + 1;
-
   const currQueueNumber = currOffice?.peopleInQueue?.find(
     (q) => q.id === currentUser.id
   );
@@ -51,10 +49,7 @@ const QueueConfirmationDialog = ({
     isRemove
       ? await removeFromQueue(
           {
-            ...currentUser,
-            attendance: false,
-            isDone: false,
-            queueNumber: currQueueNumber.queueNumber,
+            ...currQueueNumber,
           },
           officeId
         )
@@ -62,8 +57,7 @@ const QueueConfirmationDialog = ({
           {
             ...currentUser,
             attendance: false,
-            isDone: false,
-            queueNumber: newQueueNumber,
+            createdAt: Timestamp.now(),
           },
           officeId
         );
@@ -75,7 +69,6 @@ const QueueConfirmationDialog = ({
     isRemove,
     removeFromQueue,
     onClose,
-    newQueueNumber,
     currQueueNumber,
   ]);
 

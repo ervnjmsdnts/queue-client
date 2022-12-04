@@ -1,5 +1,6 @@
 import { Typography } from "@mui/material";
 import { Container } from "@mui/system";
+import userEvent from "@testing-library/user-event";
 import {
   arrayRemove,
   arrayUnion,
@@ -47,19 +48,22 @@ const ScannerPage = () => {
         const userInQueue = currOffice?.peopleInQueue?.find(
           (q) => q.id === result.id
         );
-        if (userInQueue === undefined)
-          return toast.error("You are not in this queue");
-        await updateDoc(doc(db, "offices", currentUser.id), {
-          peopleInQueue: arrayRemove({ ...userInQueue }),
-        });
-        await updateDoc(doc(db, "offices", currentUser.id), {
-          peopleInQueue: arrayUnion({ ...userInQueue, attendance: true }),
-        });
-        toast.success("Attendance Confirmed");
-        navigate(-1);
+        if (!!userInQueue) {
+          await updateDoc(doc(db, "offices", currentUser.id), {
+            peopleInQueue: arrayRemove({ ...userInQueue }),
+          });
+          await updateDoc(doc(db, "offices", currentUser.id), {
+            peopleInQueue: arrayUnion({ ...userInQueue, attendance: true }),
+          });
+          toast.success("Attendance Confirmed");
+          return navigate(-1);
+        } else {
+          toast.error("You are not in this queue");
+          return navigate(-1);
+        }
       }
     })();
-  }, [scanResult, navigate, currentUser.id]);
+  }, [scanResult, currentUser, loading]);
 
   return (
     <Container maxWidth="md">

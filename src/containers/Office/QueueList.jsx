@@ -8,13 +8,14 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import {
   arrayRemove,
-  arrayUnion,
   doc,
   onSnapshot,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import uuid from "react-uuid";
 import { db } from "../../firebase";
 import useAuth from "../../hooks/useAuth";
 
@@ -26,55 +27,80 @@ const QueueList = () => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "offices", currentUser.id), (snapshot) => {
-      setOffice(snapshot.data());
-      setLoading(false);
-    });
+    (() => {
+      const unsub = onSnapshot(
+        doc(db, "offices", currentUser?.id),
+        (snapshot) => {
+          setOffice(snapshot.data());
+          setLoading(false);
+        }
+      );
 
-    return () => {
-      unsub();
-    };
-  }, [currentUser.id]);
+      return () => {
+        unsub();
+      };
+    })();
+  }, [currentUser?.id]);
 
   useEffect(() => {
     if (!loading) {
-      const peopleInQueue = office.peopleInQueue.map((person, index) => {
+      const peopleInQueue = office.peopleInQueue.map((person) => {
         return {
           id: person.id,
-          queueNumber: person.queueNumber,
-          queuer: `${person.displayName} (${person.id.slice(0, 6)})`,
+          queuer: person.id.slice(0, 6),
           attendance: person.attendance,
-          isDone: person.isDone,
+          createdAt: person.createdAt,
         };
       });
 
-      setRows(peopleInQueue.sort((a, b) => a.queueNumber - b.queueNumber));
+      setRows(
+        peopleInQueue.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds)
+      );
     }
   }, [loading, office.peopleInQueue]);
 
-  const attendedQueue = rows?.filter(
-    (row) => row.attendance === true && row.isDone === false
-  );
+  const attendedQueue = rows?.filter((row) => row.attendance === true);
+
+  const sendNotifications = async () => {
+    const unsub = onSnapshot(
+      doc(db, "offices", currentUser?.id),
+      async (snapshot) => {
+        const batch = writeBatch(db);
+        if (snapshot.data()) {
+          for (let i = 0; i < snapshot.data().peopleInQueue.length; i++) {
+            const ref = doc(db, "notifications", uuid());
+            batch.set(ref, {
+              userId: snapshot.data().peopleInQueue[i].id,
+              message: `You are near the queue of ${office.name} ${office.window}`,
+            });
+          }
+        }
+        await batch.commit();
+      }
+    );
+    return () => {
+      unsub();
+    };
+  };
 
   const nextQueuer = useCallback(async () => {
     const queuer = office?.peopleInQueue?.find(
       (q) => q.id === attendedQueue[0].id
     );
-    await updateDoc(doc(db, "offices", currentUser.id), {
+    await updateDoc(doc(db, "offices", currentUser?.id), {
       peopleInQueue: arrayRemove({ ...queuer }),
     });
-    await updateDoc(doc(db, "offices", currentUser.id), {
-      peopleInQueue: arrayUnion({ ...queuer, isDone: true }),
-    });
-  }, [attendedQueue, currentUser.id]);
+
+    await sendNotifications();
+  }, [attendedQueue, currentUser?.id]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 200, hide: true },
     {
-      field: "queueNumber",
       headerName: "Queue Number",
       flex: 1,
       align: "center",
+      renderCell: (index) => index.api.getRowIndex(index.row.id) + 1,
     },
     {
       field: "queuer",

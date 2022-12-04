@@ -10,6 +10,12 @@ export const useRegister = () => {
   const execute = useCallback(async (payload = {}) => {
     try {
       setIsValidating(true);
+      const conditions = [where("email", "==", payload.email)];
+      const ref = collection(db, "users");
+      const filterQuery = query(ref, ...conditions);
+      const user = await getDocs(filterQuery);
+
+      if (user.size) return setError("already exists");
 
       const res = await addDoc(collection(db, "users"), {
         displayName: `${payload.firstName} ${payload.lastName}`,

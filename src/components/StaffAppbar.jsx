@@ -20,7 +20,7 @@ const StaffAppbar = () => {
           height="100%"
         >
           <Typography>
-            {currentUser.role === "admin" ? "Admin" : "Office"}
+            {currentUser?.role === "admin" ? "Admin" : "Office"}
           </Typography>
           <Button onClick={handleLogout} color="inherit">
             Logout

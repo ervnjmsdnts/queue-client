@@ -23,6 +23,8 @@ const App = () => {
           <Route path="" element={<AdminPage />} />
           <Route path="organization/:orgId" element={<OrganizationPage />} />
         </Route>
+      </Route>
+      <Route element={<StaffLayout />}>
         <Route path="/office">
           <Route path="" element={<OfficePage />} />
           <Route path="scan" element={<ScannerPage />} />

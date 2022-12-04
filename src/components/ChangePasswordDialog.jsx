@@ -63,9 +63,9 @@ const ChangePasswordDialog = ({ onClose, open }) => {
       if (error) return toast.error("Something went wrong");
 
       toast.success("Updated Password");
-      onClose();
+      return onClose();
     })();
-  }, [data, error, onClose]);
+  }, [data, error]);
 
   return (
     <Dialog onClose={onClose} open={open}>

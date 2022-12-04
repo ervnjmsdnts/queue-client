@@ -1,11 +1,21 @@
 import { Box, Container } from "@mui/material";
-import { Navigate, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import StaffAppbar from "../components/StaffAppbar";
 import useAuth from "../hooks/useAuth";
 
 const StaffLayout = ({ children }) => {
   const { currentUser } = useAuth();
-  if (!currentUser) return <Navigate to="/" />;
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!currentUser) return navigate("/");
+    if (currentUser && currentUser.role === "user") return navigate("/user");
+    if (currentUser && currentUser.role === "office")
+      return navigate("/office");
+    if (currentUser && currentUser.role === "admin") return navigate("/admin");
+  }, [currentUser]);
   return (
     <>
       <StaffAppbar />

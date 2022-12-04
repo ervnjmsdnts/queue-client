@@ -10,6 +10,7 @@ export const useChangePassword = () => {
   const execute = useCallback(async (payload = {}, userId) => {
     try {
       setIsValidating(true);
+      setResponse(false);
 
       await updateDoc(doc(db, "users", userId), {
         password: payload.password,
