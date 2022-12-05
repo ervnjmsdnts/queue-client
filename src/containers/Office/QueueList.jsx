@@ -94,12 +94,6 @@ const QueueList = () => {
     await sendNotifications();
   }, [attendedQueue, currentUser?.id]);
 
-  const clearQueue = useCallback(async () => {
-    await updateDoc(doc(db, "offices", currentUser?.id), {
-      peopleInQueue: [],
-    });
-  }, [currentUser?.id]);
-
   const columns = [
     { field: "id", headerName: "ID", width: 200, hide: true },
     {
@@ -138,19 +132,14 @@ const QueueList = () => {
           <Typography variant="h4" fontWeight="bold">
             {office.name} {office.window}
           </Typography>
-          <Box display="flex" alignItems="center" gap="8px">
-            <Button variant="contained" onClick={clearQueue} color="warning">
-              Clear Queue
-            </Button>
-            <Button
-              target="_blank"
-              variant="contained"
-              LinkComponent={Link}
-              to="/scan"
-            >
-              Scan QR
-            </Button>
-          </Box>
+          <Button
+            target="_blank"
+            variant="contained"
+            LinkComponent={Link}
+            to="/scan"
+          >
+            Scan QR
+          </Button>
         </Box>
         <Box
           height="70vh"

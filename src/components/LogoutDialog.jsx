@@ -1,10 +1,22 @@
 import { Box, Button, Dialog, Typography } from "@mui/material";
+import { doc, updateDoc } from "firebase/firestore";
+import { useCallback } from "react";
+import { db } from "../firebase";
 import useAuth from "../hooks/useAuth";
 
 const LogoutDialog = ({ onClose, open }) => {
-  const { logout } = useAuth();
+  const { logout, currentUser } = useAuth();
 
-  const handleLogout = () => {
+  const clearQueue = useCallback(async () => {
+    await updateDoc(doc(db, "offices", currentUser?.id), {
+      peopleInQueue: [],
+    });
+  }, [currentUser?.id]);
+
+  const handleLogout = async () => {
+    if (currentUser?.role === "office") {
+      await clearQueue();
+    }
     logout();
     window.location.reload();
   };
