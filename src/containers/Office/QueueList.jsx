@@ -94,6 +94,12 @@ const QueueList = () => {
     await sendNotifications();
   }, [attendedQueue, currentUser?.id]);
 
+  const clearQueue = useCallback(async () => {
+    await updateDoc(doc(db, "offices", currentUser?.id), {
+      peopleInQueue: [],
+    });
+  }, [currentUser?.id]);
+
   const columns = [
     { field: "id", headerName: "ID", width: 200, hide: true },
     {
@@ -132,14 +138,19 @@ const QueueList = () => {
           <Typography variant="h4" fontWeight="bold">
             {office.name} {office.window}
           </Typography>
-          <Button
-            target="_blank"
-            variant="contained"
-            LinkComponent={Link}
-            to="/scan"
-          >
-            Scan QR
-          </Button>
+          <Box display="flex" alignItems="center" gap="8px">
+            <Button variant="contained" onClick={clearQueue} color="warning">
+              Clear Queue
+            </Button>
+            <Button
+              target="_blank"
+              variant="contained"
+              LinkComponent={Link}
+              to="/scan"
+            >
+              Scan QR
+            </Button>
+          </Box>
         </Box>
         <Box
           height="70vh"
@@ -160,9 +171,8 @@ const QueueList = () => {
                 backgroundColor: theme.palette.error.main,
                 color: "white",
               },
-              "& .doneQueue": {
-                backgroundColor: theme.palette.warning.main,
-                color: "white",
+              "& .MuiDataGrid-row:hover": {
+                backgroundColor: theme.palette.grey[400],
               },
             }}
           >
@@ -171,11 +181,7 @@ const QueueList = () => {
               rows={rows}
               pageSize={10}
               getRowClassName={(params) => {
-                return params.row.isDone
-                  ? "doneQueue"
-                  : params.row.attendance
-                  ? "attended"
-                  : "notAttended";
+                return params.row.attendance ? "attended" : "notAttended";
               }}
             />
           </Box>
