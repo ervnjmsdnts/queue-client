@@ -7,29 +7,31 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import { toast } from "react-toastify";
 import { db } from "../firebase";
 import useAuth from "../hooks/useAuth";
-
+import _ from "lodash";
 const ScannerPage = () => {
   const [scanResult, setScanResult] = useState("");
   const [currOffice, setCurrOffice] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const { currentUser } = useAuth();
 
-  const handleScan = (result) => {
-    if (result) {
-      setScanResult(result);
-    }
-  };
+  const handleScan = useCallback(
+    (result) => {
+      if (result) {
+        if (_.isEqual(result, scanResult)) return;
+        setScanResult(result);
+      }
+    },
+    [scanResult]
+  );
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "offices", currentUser.id), (snapshot) => {
       setCurrOffice(snapshot.data());
-      setLoading(false);
     });
 
     return () => {
@@ -38,13 +40,16 @@ const ScannerPage = () => {
   }, [currentUser.id]);
 
   useEffect(() => {
-    (async () => {
-      if (scanResult && !loading) {
+    const scanning = async () => {
+      if (scanResult && currOffice) {
         const result = JSON.parse(scanResult.text);
         const userInQueue = currOffice?.peopleInQueue?.find(
           (q) => q.id === result.id
         );
         if (!!userInQueue) {
+          if (userInQueue.attendance) {
+            return toast.warning("You have already attended the queue");
+          }
           await updateDoc(doc(db, "offices", currentUser.id), {
             peopleInQueue: arrayRemove({ ...userInQueue }),
           });
@@ -56,8 +61,9 @@ const ScannerPage = () => {
           return toast.error("You are not in this queue");
         }
       }
-    })();
-  }, [scanResult, currentUser, loading]);
+    };
+    return () => scanning();
+  }, [currentUser, scanResult, currOffice]);
 
   return (
     <Container maxWidth="md">
@@ -67,7 +73,7 @@ const ScannerPage = () => {
       <QrReader
         onResult={handleScan}
         containerStyle={{ marginTop: -64 }}
-        delay={300}
+        delay={1000}
         style={{ width: "100%" }}
       />
     </Container>
