@@ -47,9 +47,7 @@ const ScannerPage = () => {
           (q) => q.id === result.id
         );
         if (!!userInQueue) {
-          if (userInQueue.attendance) {
-            return toast.warning("You have already attended the queue");
-          }
+          if (userInQueue.attendance) return;
           await updateDoc(doc(db, "offices", currentUser.id), {
             peopleInQueue: arrayRemove({ ...userInQueue }),
           });
@@ -58,12 +56,12 @@ const ScannerPage = () => {
           });
           return toast.success("Attendance Confirmed");
         } else {
-          return toast.error("You are not in this queue");
+          return;
         }
       }
     };
     return () => scanning();
-  }, [currentUser, scanResult, currOffice]);
+  }, [currentUser, scanResult]);
 
   return (
     <Container maxWidth="md">

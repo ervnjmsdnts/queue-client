@@ -161,7 +161,7 @@ const QueueList = () => {
                 color: "white",
               },
               "& .MuiDataGrid-row:hover": {
-                backgroundColor: theme.palette.grey[400],
+                backgroundColor: theme.palette.grey[600],
               },
             }}
           >
