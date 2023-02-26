@@ -75,14 +75,10 @@ const QueueConfirmationDialog = ({
     let scheduledMoment = moment(appointmentMomentRounded);
 
     if (queue.length > 0) {
-      const latestScheduledTime = moment(
-        Math.max(...queue.map((q) => q.scheduledTime))
-      );
-      if (latestScheduledTime.isBefore(appointmentMomentRounded)) {
-        scheduledMoment = latestScheduledTime.add(clientDuration, "minutes");
-      } else {
-        scheduledMoment.add(clientDuration, "minutes");
-      }
+      const latestScheduledTime = moment(queue[queue.length - 1].scheduledTime);
+
+      appointmentMomentRounded.add(clientDuration, "minutes");
+      scheduledMoment = latestScheduledTime.add(clientDuration, "minutes");
     } else {
       scheduledMoment.add(clientDuration, "minutes");
     }
