@@ -38,7 +38,7 @@ const OfficePage = () => {
 
         timerId = setTimeout(() => {
           startExpirationTimer();
-        }, 60000);
+        }, 30000);
       } catch (error) {
         console.error(error);
       }
