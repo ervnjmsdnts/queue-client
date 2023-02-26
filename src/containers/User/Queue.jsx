@@ -51,8 +51,8 @@ const Queue = ({
 
   const handleOpenDialog = () => {
     if (inQueue) return setOpenDialog(true);
-    if (inAnotherQueue) return toast.error("Only limited to 1 queue");
     if (!canQueue) return toast.error("Office closed for the day");
+    if (inAnotherQueue) return toast.error("Only limited to 1 queue");
     return setOpenDialog(true);
   };
 
