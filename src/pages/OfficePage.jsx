@@ -30,22 +30,18 @@ const OfficePage = () => {
   };
 
   useEffect(() => {
-    let timerId = null;
-
     const startExpirationTimer = async () => {
       try {
         await removeExpiredAppointments(currentUser?.id);
-
-        timerId = setInterval(() => {
-          console.log("Test");
-          startExpirationTimer();
-        }, 15000);
       } catch (error) {
         console.error(error);
       }
     };
 
-    startExpirationTimer();
+    const timerId = setInterval(() => {
+      console.log("Test");
+      startExpirationTimer();
+    }, 15000);
 
     return () => {
       clearInterval(timerId);
