@@ -15,6 +15,8 @@ const UserLayout = ({ children }) => {
     if (currentUser && currentUser.role === "office")
       return navigate("/office");
     if (currentUser && currentUser.role === "admin") return navigate("/admin");
+    if (currentUser && currentUser.role === "organization")
+      return navigate("/organization");
   }, [currentUser]);
 
   return (

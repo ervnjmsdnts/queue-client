@@ -19,8 +19,27 @@ export const useAddOrganization = () => {
   const execute = useCallback(async (payload = {}) => {
     try {
       setIsValidating(true);
-      const res = await addDoc(collection(db, "organizations"), { ...payload });
-      setResponse(res);
+      setError();
+      setResponse();
+      const conditions = [where("email", "==", payload.email)];
+      const ref = collection(db, "users");
+      const filterQuery = query(ref, ...conditions);
+      const user = await getDocs(filterQuery);
+
+      if (user.size) return setError("Already Exists");
+
+      const resUser = await addDoc(collection(db, "users"), {
+        displayName: payload.name,
+        role: "organization",
+        email: payload.email,
+        password: payload.password,
+      });
+
+      const resOrg = await setDoc(doc(db, "organizations", resUser.id), {
+        ...payload,
+      });
+
+      setResponse(resOrg);
     } catch (e) {
       setError(e);
     } finally {
@@ -50,10 +69,10 @@ export const useAddOffice = () => {
       const filterQuery = query(ref, ...conditions);
       const user = await getDocs(filterQuery);
 
-      if (user.size) return setError("already exists");
+      if (user.size) return setError("Already Exists");
 
       const resUser = await addDoc(collection(db, "users"), {
-        displayName: payload.username,
+        displayName: payload.name,
         role: "office",
         email: payload.email,
         password: payload.password,

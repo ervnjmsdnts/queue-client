@@ -1,21 +1,12 @@
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import AddOrganizationDialog from "./AddOrganizationDialog";
-import { Link } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { db } from "../../firebase.js";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useEditOrganization } from "./actions";
 import { toast } from "react-toastify";
-
-const ShowOrganizationDetails = ({ orgId }) => {
-  return (
-    <IconButton LinkComponent={Link} to={`organization/${orgId}`}>
-      <OpenInNewOutlinedIcon />
-    </IconButton>
-  );
-};
+import moment from "moment";
 
 const OrganizationTable = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
@@ -23,27 +14,26 @@ const OrganizationTable = () => {
   const [offices, setOffices] = useState([]);
   const [rows, setRows] = useState([]);
   const columns = [
-    { field: "id", headerName: "ID", width: 200 },
+    { field: "id", headerName: "ID", hide: true },
     {
       field: "name",
       headerName: "Organization Name",
-      width: 300,
+      flex: 1,
       editable: true,
     },
     {
       field: "windows",
       headerName: "Number of Window Offices",
-      width: 200,
-      align: "center",
+      flex: 1,
     },
     {
-      headerName: "",
-      renderCell: (params) => <ShowOrganizationDetails orgId={params.id} />,
-      align: "center",
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      width: 150,
+      field: "time",
+      headerName: "Time",
+      renderCell: (params) =>
+        `${moment(params.row.openingTime).format("hh:mm A")} - ${moment(
+          params.row.closingTime
+        ).format("hh:mm A")}`,
+      flex: 1,
     },
   ];
 

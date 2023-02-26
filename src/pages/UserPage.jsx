@@ -5,9 +5,11 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Typography,
   useMediaQuery,
 } from "@mui/material";
 import { collection, onSnapshot } from "firebase/firestore";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Queue from "../containers/User/Queue";
@@ -54,6 +56,8 @@ const UserPage = () => {
 
   const { currentUser } = useAuth();
 
+  const currentOrg = organizations?.find((org) => org.id === selectedOrg);
+
   useEffect(() => {
     (async () => {
       if (organizations && offices) {
@@ -66,6 +70,16 @@ const UserPage = () => {
       }
     })();
   }, [offices, selectedOrg, organizations, currentUser.id]);
+
+  const format = "hh:mm:ss";
+
+  const openTime = moment(currentOrg?.openingTime).subtract(1, "hour");
+  const closeTime = moment(currentOrg?.closingTime);
+
+  const canQueue = moment(new Date(), format).isBetween(
+    moment(openTime, format),
+    moment(closeTime, format)
+  );
 
   if (loadingOrg || loadingOff) {
     return (
@@ -80,9 +94,13 @@ const UserPage = () => {
       <Box
         mb="16px"
         display="flex"
-        justifyContent="flex-end"
-        alignItems="flex-end"
+        justifyContent="space-between"
+        alignItems="center"
       >
+        <Typography>
+          Available Queue Time: {openTime.format("hh:mm A")}{" "}
+          {closeTime.format("hh:mm A")}
+        </Typography>
         <FormControl sx={{ minWidth: matches ? "200px" : "100%" }} size="small">
           <InputLabel id="label">Organization</InputLabel>
           <Select
@@ -103,14 +121,19 @@ const UserPage = () => {
         display="grid"
         gap="24px"
         gridTemplateColumns={!matches ? "repeat(1, 1fr)" : "repeat(4, 1fr)"}
+        alignItems="start"
       >
         {queues.map((queue) => (
           <Queue
+            canQueue={canQueue}
             inAnotherQueue={inAnotherQueue}
             organization={queue.name}
+            duration={queue.clientDuration}
             key={queue.id}
             window={queue.window}
             officeId={queue.id}
+            closeTime={closeTime}
+            openTime={moment(openTime).add(1, "hour")}
           />
         ))}
       </Box>

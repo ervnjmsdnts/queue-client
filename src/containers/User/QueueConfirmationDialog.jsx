@@ -1,5 +1,6 @@
 import { Box, Button, Dialog, Typography } from "@mui/material";
 import { doc, onSnapshot, Timestamp } from "firebase/firestore";
+import moment from "moment";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { db } from "../../firebase";
@@ -13,6 +14,9 @@ const QueueConfirmationDialog = ({
   window,
   isRemove,
   officeId,
+  duration,
+  openTime,
+  closeTime,
 }) => {
   const {
     data: addData,
@@ -45,24 +49,81 @@ const QueueConfirmationDialog = ({
     (q) => q.id === currentUser.id
   );
 
+  const calculateScheduledTime = (
+    clientDuration,
+    appointmentTime,
+    queue,
+    openTime,
+    closeTime
+  ) => {
+    const appointmentMoment = moment(appointmentTime, "HH:mm");
+    const minute = appointmentMoment.minute();
+    const minuteDiff =
+      Math.ceil(minute / clientDuration) * clientDuration - minute;
+    const appointmentMomentRounded = moment(appointmentMoment)
+      .add(minuteDiff, "minutes")
+      .startOf("minute");
+
+    // Check if appointment time is before open time
+    if (appointmentMomentRounded.isBefore(openTime)) {
+      appointmentMomentRounded.set({
+        hour: openTime.get("hour"),
+        minute: openTime.get("minute"),
+      });
+    }
+
+    let scheduledMoment = moment(appointmentMomentRounded);
+
+    if (queue.length > 0) {
+      const latestScheduledTime = moment(
+        Math.max(...queue.map((q) => q.scheduledTime))
+      );
+      if (latestScheduledTime.isBefore(appointmentMomentRounded)) {
+        scheduledMoment = latestScheduledTime.add(clientDuration, "minutes");
+      } else {
+        scheduledMoment.add(clientDuration, "minutes");
+      }
+    } else {
+      scheduledMoment.add(clientDuration, "minutes");
+    }
+
+    // Check if scheduled time is after close time
+    if (scheduledMoment.isAfter(closeTime)) {
+      toast.error("Appointment cannot be scheduled after closing time.");
+    }
+
+    return {
+      appointmentTime: Number(appointmentMomentRounded.format("x")),
+      scheduledTime: Number(scheduledMoment.format("x")),
+    };
+  };
+
   const onSubmit = useCallback(async () => {
-    isRemove
-      ? await removeFromQueue(
-          {
-            ...currQueueNumber,
-          },
-          officeId
-        )
-      : await addToQueue(
-          {
-            ...currentUser,
-            attendance: false,
-            createdAt: Timestamp.now(),
-          },
-          officeId
-        );
+    const queue = currOffice?.peopleInQueue || [];
+    const { appointmentTime, scheduledTime } = calculateScheduledTime(
+      duration,
+      new Date(),
+      queue,
+      openTime,
+      closeTime
+    );
+    if (isRemove) {
+      await removeFromQueue({ ...currQueueNumber }, officeId);
+    } else {
+      await addToQueue(
+        {
+          ...currentUser,
+          appointmentTime,
+          scheduledTime,
+          attendance: false,
+          createdAt: Timestamp.now(),
+        },
+        officeId
+      );
+    }
     onClose();
   }, [
+    duration,
     currentUser,
     officeId,
     addToQueue,
@@ -70,6 +131,7 @@ const QueueConfirmationDialog = ({
     removeFromQueue,
     onClose,
     currQueueNumber,
+    currOffice,
   ]);
 
   useEffect(() => {

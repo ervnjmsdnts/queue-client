@@ -8,6 +8,8 @@ const AuthLayout = ({ children }) => {
     return <Navigate to="/user" />;
   if (currentUser && currentUser.role === "office")
     return <Navigate to="/office" />;
+  if (currentUser && currentUser.role === "organization")
+    return <Navigate to="/organization" />;
   if (currentUser && currentUser.role === "admin")
     return <Navigate to="/admin" />;
   return <Box>{children ? children : <Outlet />}</Box>;

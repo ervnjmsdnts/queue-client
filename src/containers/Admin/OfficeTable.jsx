@@ -2,9 +2,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../../firebase";
+import useAuth from "../../hooks/useAuth";
 import { useEditOffice } from "./actions";
 import AddOfficeDialog from "./AddOfficeDialog";
 
@@ -17,29 +17,30 @@ const OfficeTable = () => {
       field: "name",
       headerName: "Office Name",
       editable: true,
-      width: 200,
+      flex: 1,
     },
     {
       field: "window",
       headerName: "Window",
-      width: 100,
+      flex: 1,
       editable: true,
-      align: "center",
     },
     {
       field: "email",
       headerName: "Email",
-      width: 200,
+      flex: 1,
     },
     {
-      field: "username",
-      headerName: "Username",
-      editable: true,
-      width: 200,
+      field: "clientDuration",
+      headerName: "Client Duration",
+      renderCell: (params) => `${params.formattedValue} minutes`,
+      flex: 1,
     },
   ];
 
-  const { orgId } = useParams();
+  const { currentUser } = useAuth();
+
+  const { id: orgId } = currentUser;
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "offices"), (snapshot) => {

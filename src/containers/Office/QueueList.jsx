@@ -13,6 +13,7 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
+import moment from "moment";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import uuid from "react-uuid";
@@ -25,6 +26,8 @@ const QueueList = () => {
   const [rows, setRows] = useState([]);
 
   const { currentUser } = useAuth();
+
+  console.log(rows);
 
   useEffect(() => {
     (() => {
@@ -46,6 +49,7 @@ const QueueList = () => {
     if (!loading) {
       const peopleInQueue = office.peopleInQueue.map((person) => {
         return {
+          ...person,
           id: person.id,
           queuer: person.id.slice(0, 6),
           attendance: person.attendance,
@@ -105,6 +109,16 @@ const QueueList = () => {
     {
       field: "queuer",
       headerName: "Queuer",
+      flex: 1,
+      align: "center",
+    },
+    {
+      field: "time",
+      headerName: "Appointment Time",
+      renderCell: (params) =>
+        `${moment(params.row.appointmentTime).format("hh:mm A")} ${moment(
+          params.row.scheduledTime
+        ).format("hh:mm A")}`,
       flex: 1,
       align: "center",
     },
