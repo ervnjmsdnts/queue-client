@@ -36,9 +36,10 @@ const OfficePage = () => {
       try {
         await removeExpiredAppointments(currentUser?.id);
 
-        timerId = setTimeout(() => {
+        timerId = setInterval(() => {
+          console.log("Test");
           startExpirationTimer();
-        }, 30000);
+        }, 15000);
       } catch (error) {
         console.error(error);
       }
@@ -47,7 +48,7 @@ const OfficePage = () => {
     startExpirationTimer();
 
     return () => {
-      clearTimeout(timerId);
+      clearInterval(timerId);
     };
   }, [currentUser?.id]);
 

@@ -27,8 +27,6 @@ const QueueList = () => {
 
   const { currentUser } = useAuth();
 
-  console.log(rows);
-
   useEffect(() => {
     (() => {
       const unsub = onSnapshot(
