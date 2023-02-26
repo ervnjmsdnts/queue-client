@@ -20,8 +20,8 @@ const OfficePage = () => {
       const officeData = officeDocSnap.data();
       console.log({ officeData });
       const updatedQueue = officeData.peopleInQueue.filter((appointment) => {
-        const scheduledTime = moment(appointment.scheduledTime);
-        return scheduledTime.isAfter(now);
+        const appointmentTime = moment(appointment.appointmentTime);
+        return appointmentTime.isAfter(now);
       });
       await updateDoc(officeDocRef, {
         peopleInQueue: updatedQueue,
