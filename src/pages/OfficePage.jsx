@@ -18,10 +18,11 @@ const OfficePage = () => {
     const officeDocSnap = await getDoc(officeDocRef);
     if (officeDocSnap.exists()) {
       const officeData = officeDocSnap.data();
-      console.log({ officeData });
       const updatedQueue = officeData.peopleInQueue.filter((appointment) => {
         const appointmentTime = moment(appointment.appointmentTime);
-        return appointmentTime.isAfter(now);
+        const scheduledTime = moment(appointment.scheduledTime);
+        if (appointment.attendance) return scheduledTime.isAfter(now);
+        else return appointmentTime.isAfter(now);
       });
       await updateDoc(officeDocRef, {
         peopleInQueue: updatedQueue,
