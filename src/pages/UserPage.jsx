@@ -71,15 +71,16 @@ const UserPage = () => {
     })();
   }, [offices, selectedOrg, organizations, currentUser.id]);
 
-  const format = "hh:mm:ss";
+  const format = "HH:mm:ss";
 
-  const openTime = moment(currentOrg?.openingTime).subtract(1, "hour");
+  const currentDateTime = moment().valueOf();
+  const openTime = moment(currentOrg?.openingTime);
   const closeTime = moment(currentOrg?.closingTime);
+  const currentFormattedTime = moment(currentDateTime).format("HH:mm:ss");
 
-  const canQueue = moment(new Date(), format).isBetween(
-    moment(openTime, format),
-    moment(closeTime, format)
-  );
+  const canQueue =
+    currentFormattedTime >= openTime.format(format) &&
+    currentFormattedTime <= closeTime.format(format);
 
   if (loadingOrg || loadingOff) {
     return (
